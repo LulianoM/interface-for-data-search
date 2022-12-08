@@ -2,3 +2,4 @@ streamlit
 watchdog
 bokeh
 streamlit_bokeh_events
+requests

@@ -2,13 +2,15 @@ import streamlit as st
 from bokeh.models.widgets import Button
 from bokeh.models import CustomJS
 from streamlit_bokeh_events import streamlit_bokeh_events
+import requests
+import os
 
 st.header("Mapeamento de utilitários na Cidade Universitária (UFRJ - Ilha do Fundão)")
 st.text(" Discentes: Débora Mendes e Fernanda Faria \nDocente: Rafael Barros \nLaboratório de Geoprocessamento 2022.2 ")
 
 
 # Nome do Estabelecimento
-st.text_input("Nome do Estabelecimento")
+name = st.text_input("Nome do Estabelecimento")
 
 # Categoria do Estabelecimento:
 category_place = st.multiselect("Categoria do Estabelecimento:", ["Chaveiro","Correios","Papelaria",
@@ -47,14 +49,14 @@ loc_button.js_on_event("button_click", CustomJS(code="""
         }
     )
     """))
-result = streamlit_bokeh_events(
+geolocation = streamlit_bokeh_events(
     loc_button,
     events="GET_LOCATION",
     key="get_location",
     refresh_on_update=False,
     override_height=75,
     debounce_time=0)
-st.info(result)
+st.info(geolocation)
 
 # Local
 st.selectbox("Selecione o Local:", ["Letras - FL","CCMN","FAU","CT","CCS","EEFD","EBA","Vila Residencial",])
@@ -85,5 +87,19 @@ st.text_input("Envio e recebimento de encomendas? (exclusivo para a categoria Co
 # Entrega dentro da UFRJ? (exclusivo para a categoria "Farmácia")
 st.selectbox("Entrega dentro da UFRJ? (exclusivo para a categoria Farmácia)", ["SIM", "NÃO"])
 
+
+body = {
+    "name": name,
+    "class":  ' '.join([str(elem) for elem in category_place]),
+    "coordinates": str(geolocation['GET_LOCATION']['lat']) + ' , ' + str(geolocation['GET_LOCATION']['lon']),
+    "payment_forms": ' '.join([str(elem) for elem in payment_form]),
+}
+st.info(body)
+
 if st.button("ENVIAR"):
-    st.balloons()
+    url = os.getenv("URL_BACKEND")
+    # url = "http://127.0.0.1:8080/api/commercials"
+    response = requests.post(url, json=body)
+    if response.status_code:
+        st.balloons()
+        st.info(response.json())
