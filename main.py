@@ -87,11 +87,15 @@ st.text_input("Envio e recebimento de encomendas? (exclusivo para a categoria Co
 # Entrega dentro da UFRJ? (exclusivo para a categoria "Farmácia")
 st.selectbox("Entrega dentro da UFRJ? (exclusivo para a categoria Farmácia)", ["SIM", "NÃO"])
 
+try:
+    coordinates = str(geolocation['GET_LOCATION']['lat']) + ' , ' + str(geolocation['GET_LOCATION']['lon'])
+except:
+    coordinates = "NULL, NULL"
 
 body = {
     "name": name,
     "class":  ' '.join([str(elem) for elem in category_place]),
-    "coordinates": str(geolocation['GET_LOCATION']['lat']) + ' , ' + str(geolocation['GET_LOCATION']['lon']),
+    "coordinates": coordinates,
     "payment_forms": ' '.join([str(elem) for elem in payment_form]),
 }
 st.info(body)
